@@ -4,7 +4,7 @@
 
 **A self-hosted diagnostic tool that tells web scraper and headless browser developers what makes their bots look like bots.**
 
-[![CI](https://github.com/your-username/fingerprint-check/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/fingerprint-check/actions/workflows/ci.yml)
+[![CI](https://github.com/Lunar-Dev17/Fingerprint-Check/actions/workflows/ci.yml/badge.svg)](https://github.com/Lunar-Dev17/Fingerprint-Check/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)](https://fastapi.tiangolo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
