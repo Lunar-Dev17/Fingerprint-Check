@@ -34,6 +34,24 @@ def test_zero_outer_dimensions_fail():
     assert "outerwidth" in result.explanation.lower()
 
 
+def test_inner_width_greater_than_outer_width_warns():
+    check = ScreenHeadlessCheck()
+    req = build_fake_request()
+    result = check.run(req, client_data={
+        "js_user_agent": "Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36",
+        "outer_width": 1000,
+        "outer_height": 800,
+        "inner_width": 1200,
+        "inner_height": 800,
+        "screen_width": 1920,
+        "screen_height": 1080,
+        "screen_color_depth": 24,
+    })
+
+    assert result.status == "warn"
+    assert "exceeds" in result.explanation.lower()
+
+
 def test_default_800x600_screen_warns():
     check = ScreenHeadlessCheck()
     req = build_fake_request()
@@ -55,6 +73,8 @@ def test_normal_screen_and_window_passes():
     result = check.run(req, client_data={
         "outer_width": 1920,
         "outer_height": 1040,
+        "inner_width": 1920,
+        "inner_height": 950,
         "screen_width": 1920,
         "screen_height": 1080,
         "screen_color_depth": 24,

@@ -18,6 +18,18 @@ LANGUAGE_REGION_MAP: dict[str, list[str]] = {
     "it": ["europe/rome", "europe/"],
 }
 
+UTC_ALIASES = {
+    "UTC",
+    "ETC/UTC",
+    "ETC/GMT",
+    "GMT",
+    "ETC/GMT+0",
+    "ETC/GMT-0",
+    "GMT0",
+    "UCT",
+    "ZULU",
+}
+
 
 class TimezoneLanguageCheck(BaseCheck):
     """Detects discrepancies between client-side JavaScript timezone and HTTP Accept-Language."""
@@ -38,6 +50,11 @@ class TimezoneLanguageCheck(BaseCheck):
         timezone = str(client_data.get("timezone", "")).strip()
         accept_language = request.headers.get("accept-language", "").strip().lower()
 
+        # Fallback to client-side declared languages if wire header was omitted
+        if not accept_language and client_data:
+            fallback_langs = client_data.get("languages", []) or [client_data.get("language", "")]
+            accept_language = ",".join(str(lang) for lang in fallback_langs if lang).strip().lower()
+
         if not timezone:
             return CheckResult(
                 name=self.name,
@@ -47,7 +64,7 @@ class TimezoneLanguageCheck(BaseCheck):
             )
 
         # Datacenter UTC indicator
-        if timezone.upper() in ("UTC", "ETC/UTC", "ETC/GMT", "GMT"):
+        if timezone.upper() in UTC_ALIASES:
             return CheckResult(
                 name=self.name,
                 status="warn",

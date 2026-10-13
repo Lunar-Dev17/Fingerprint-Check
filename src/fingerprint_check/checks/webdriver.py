@@ -26,7 +26,14 @@ class WebdriverCheck(BaseCheck):
         webdriver = client_data.get("webdriver")
         webdriver_raw = client_data.get("webdriver_raw")
 
-        if webdriver is True or webdriver_raw is True:
+        is_flagged = (
+            webdriver is True
+            or webdriver_raw is True
+            or str(webdriver).strip().lower() in ("true", "1")
+            or str(webdriver_raw).strip().lower() in ("true", "1")
+        )
+
+        if is_flagged:
             return CheckResult(
                 name=self.name,
                 status="fail",

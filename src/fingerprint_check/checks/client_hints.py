@@ -76,10 +76,10 @@ class ClientHintsCheck(BaseCheck):
 
         # Case 3: Version consistency between User-Agent and sec-ch-ua
         if sec_ch_ua and is_chromium:
-            ua_ver_match = re.search(r"(?:chrome|chromium|edg|headlesschrome)/(\d+)", ua_lower)
+            ua_ver_match = re.search(r"(?:edg|headlesschrome|chromium|chrome)/(\d+)", ua_lower)
             if ua_ver_match:
                 ua_major = ua_ver_match.group(1)
-                brand_versions = re.findall(r'"([^"]+)";v="?(\d+)"?', sec_ch_ua)
+                brand_versions = re.findall(r'"([^"]+)";\s*v="?(\d+)"?', sec_ch_ua)
                 for brand, ver in brand_versions:
                     brand_lower = brand.lower()
                     if ("chrome" in brand_lower or "chromium" in brand_lower or "edge" in brand_lower) and "not" not in brand_lower:
@@ -107,6 +107,8 @@ class ClientHintsCheck(BaseCheck):
                 ua_os = "windows"
             elif "macintosh" in ua_lower or "mac os x" in ua_lower:
                 ua_os = "macos"
+            elif "cros" in ua_lower:
+                ua_os = "chrome os"
             elif "android" in ua_lower:
                 ua_os = "android"
             elif "iphone" in ua_lower or "ipad" in ua_lower:

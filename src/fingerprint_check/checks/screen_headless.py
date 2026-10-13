@@ -47,7 +47,7 @@ class ScreenHeadlessCheck(BaseCheck):
         outer_w = client_data.get("outer_width", 0)
         outer_h = client_data.get("outer_height", 0)
 
-        if outer_w == 0 and outer_h == 0:
+        if outer_w <= 0 and outer_h <= 0:
             return CheckResult(
                 name=self.name,
                 status="fail",
@@ -59,11 +59,24 @@ class ScreenHeadlessCheck(BaseCheck):
                 fix="Launch Chromium with '--headless=new' or configure a window size using '--window-size=1920,1080'.",
             )
 
-        # 3. Screen dimensions
+        # 3. Viewport inner vs outer dimension anomaly
+        inner_w = client_data.get("inner_width", 0)
+        if outer_w > 0 and inner_w > outer_w:
+            return CheckResult(
+                name=self.name,
+                status="warn",
+                explanation=(
+                    f"Dimension anomaly: 'window.innerWidth' ({inner_w}) exceeds 'window.outerWidth' ({outer_w}). "
+                    "In physical browser windows, outer frame dimensions are always equal to or larger than inner viewport dimensions."
+                ),
+                fix="Ensure outer window size accommodates inner viewport dimensions.",
+            )
+
+        # 4. Screen dimensions
         screen_w = client_data.get("screen_width", 0)
         screen_h = client_data.get("screen_height", 0)
 
-        if screen_w == 0 or screen_h == 0:
+        if screen_w <= 0 or screen_h <= 0:
             return CheckResult(
                 name=self.name,
                 status="fail",
@@ -82,7 +95,7 @@ class ScreenHeadlessCheck(BaseCheck):
                 fix="Set a realistic desktop resolution (e.g. 1920x1080, 1440x900, or 1366x768).",
             )
 
-        # 4. Color depth
+        # 5. Color depth
         color_depth = client_data.get("screen_color_depth", 24)
         if color_depth < 24:
             return CheckResult(

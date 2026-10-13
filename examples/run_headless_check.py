@@ -124,8 +124,14 @@ def main() -> int:
 
     finally:
         if server_process:
-            server_process.terminate()
-            server_process.wait()
+            try:
+                server_process.terminate()
+                server_process.wait(timeout=3)
+            except Exception:
+                try:
+                    server_process.kill()
+                except Exception:
+                    pass
 
 
 if __name__ == "__main__":

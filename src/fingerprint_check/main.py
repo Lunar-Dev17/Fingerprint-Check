@@ -59,7 +59,12 @@ async def report(request: Request) -> Response:
         try:
             body = await request.json()
             if isinstance(body, dict):
-                client_data = body
+                if "client_payload" in body and isinstance(body["client_payload"], dict):
+                    client_data = body["client_payload"]
+                elif "client_data" in body and isinstance(body["client_data"], dict):
+                    client_data = body["client_data"]
+                else:
+                    client_data = body
         except Exception:
             pass
 

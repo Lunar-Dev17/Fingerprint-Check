@@ -38,7 +38,15 @@ class HeaderOrderCheck(BaseCheck):
     def _extract_header_order(self, request: Request) -> list[str]:
         raw_headers = request.scope.get("headers")
         if raw_headers is not None:
-            return [name.decode("latin-1").lower() for name, _ in raw_headers]
+            decoded = []
+            for item in raw_headers:
+                if isinstance(item, (list, tuple)) and len(item) >= 1:
+                    key = item[0]
+                    if isinstance(key, bytes):
+                        decoded.append(key.decode("latin-1").lower())
+                    else:
+                        decoded.append(str(key).lower())
+            return decoded
         # Fallback if scope['headers'] is absent in a mock
         return [k.lower() for k in request.headers.keys()]
 
