@@ -1,13 +1,13 @@
 """Shared test fixtures and helpers for fingerprint-check tests."""
 
-from typing import Iterable
+from collections.abc import Mapping, Sequence
 
 import pytest
 from starlette.requests import Request
 
 
 def build_fake_request(
-    headers: Iterable[tuple[str, str]] | dict[str, str] | None = None,
+    headers: Sequence[tuple[str, str]] | Mapping[str, str] | None = None,
     http_version: str = "2.0",
     method: str = "GET",
     path: str = "/report",
@@ -15,7 +15,7 @@ def build_fake_request(
     """Construct a genuine Starlette Request instance with explicit headers and http_version."""
     if headers is None:
         raw_headers = []
-    elif isinstance(headers, dict):
+    elif isinstance(headers, Mapping):
         raw_headers = [(k.encode("latin-1"), v.encode("latin-1")) for k, v in headers.items()]
     else:
         raw_headers = [(k.encode("latin-1"), v.encode("latin-1")) for k, v in headers]
