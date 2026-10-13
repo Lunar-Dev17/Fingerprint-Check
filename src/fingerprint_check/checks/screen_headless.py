@@ -47,12 +47,12 @@ class ScreenHeadlessCheck(BaseCheck):
         outer_w = client_data.get("outer_width", 0)
         outer_h = client_data.get("outer_height", 0)
 
-        if outer_w <= 0 and outer_h <= 0:
+        if outer_w <= 0 or outer_h <= 0:
             return CheckResult(
                 name=self.name,
                 status="fail",
                 explanation=(
-                    "'window.outerWidth' and 'window.outerHeight' are both 0. "
+                    f"'window.outerWidth' ({outer_w}) or 'window.outerHeight' ({outer_h}) is 0 or negative. "
                     "Real desktop browsers have an outer window frame with dimensions larger than 0. "
                     "Zero outer dimensions are a classic signature of headless browsers operating without a window manager."
                 ),
@@ -61,12 +61,18 @@ class ScreenHeadlessCheck(BaseCheck):
 
         # 3. Viewport inner vs outer dimension anomaly
         inner_w = client_data.get("inner_width", 0)
-        if outer_w > 0 and inner_w > outer_w:
+        inner_h = client_data.get("inner_height", 0)
+        if (outer_w > 0 and inner_w > outer_w) or (outer_h > 0 and inner_h > outer_h):
+            dim_detail = (
+                f"'window.innerWidth' ({inner_w}) exceeds 'window.outerWidth' ({outer_w})"
+                if inner_w > outer_w
+                else f"'window.innerHeight' ({inner_h}) exceeds 'window.outerHeight' ({outer_h})"
+            )
             return CheckResult(
                 name=self.name,
                 status="warn",
                 explanation=(
-                    f"Dimension anomaly: 'window.innerWidth' ({inner_w}) exceeds 'window.outerWidth' ({outer_w}). "
+                    f"Dimension anomaly: {dim_detail}. "
                     "In physical browser windows, outer frame dimensions are always equal to or larger than inner viewport dimensions."
                 ),
                 fix="Ensure outer window size accommodates inner viewport dimensions.",

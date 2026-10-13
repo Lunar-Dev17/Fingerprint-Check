@@ -22,34 +22,61 @@ def test_headless_ua_fails():
 def test_zero_outer_dimensions_fail():
     check = ScreenHeadlessCheck()
     req = build_fake_request()
-    result = check.run(req, client_data={
+
+    # Both dimensions zero
+    result_both = check.run(req, client_data={
         "js_user_agent": "Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36",
         "outer_width": 0,
         "outer_height": 0,
         "screen_width": 1920,
         "screen_height": 1080,
     })
+    assert result_both.status == "fail"
+    assert "outerwidth" in result_both.explanation.lower()
 
-    assert result.status == "fail"
-    assert "outerwidth" in result.explanation.lower()
+    # Single dimension zero
+    result_single = check.run(req, client_data={
+        "js_user_agent": "Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36",
+        "outer_width": 0,
+        "outer_height": 1080,
+        "screen_width": 1920,
+        "screen_height": 1080,
+    })
+    assert result_single.status == "fail"
+    assert "outerwidth" in result_single.explanation.lower()
 
 
-def test_inner_width_greater_than_outer_width_warns():
+def test_inner_dimensions_exceeding_outer_warns():
     check = ScreenHeadlessCheck()
     req = build_fake_request()
-    result = check.run(req, client_data={
+
+    # inner_width exceeds outer_width
+    result_w = check.run(req, client_data={
         "js_user_agent": "Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36",
         "outer_width": 1000,
         "outer_height": 800,
         "inner_width": 1200,
-        "inner_height": 800,
+        "inner_height": 700,
         "screen_width": 1920,
         "screen_height": 1080,
         "screen_color_depth": 24,
     })
+    assert result_w.status == "warn"
+    assert "exceeds" in result_w.explanation.lower()
 
-    assert result.status == "warn"
-    assert "exceeds" in result.explanation.lower()
+    # inner_height exceeds outer_height
+    result_h = check.run(req, client_data={
+        "js_user_agent": "Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36",
+        "outer_width": 1000,
+        "outer_height": 800,
+        "inner_width": 950,
+        "inner_height": 900,
+        "screen_width": 1920,
+        "screen_height": 1080,
+        "screen_color_depth": 24,
+    })
+    assert result_h.status == "warn"
+    assert "exceeds" in result_h.explanation.lower()
 
 
 def test_default_800x600_screen_warns():
@@ -81,3 +108,10 @@ def test_normal_screen_and_window_passes():
     })
 
     assert result.status == "pass"
+
+
+def test_no_client_data_warns():
+    check = ScreenHeadlessCheck()
+    req = build_fake_request()
+    result = check.run(req)
+    assert result.status == "warn"

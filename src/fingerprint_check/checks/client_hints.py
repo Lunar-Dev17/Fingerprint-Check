@@ -121,17 +121,18 @@ class ClientHintsCheck(BaseCheck):
                 norm_ua = ua_os
 
                 if norm_ch != norm_ua:
+                    ua_os_display = "macOS" if ua_os == "macos" else ua_os.capitalize()
                     return CheckResult(
                         name=self.name,
                         status="fail",
                         explanation=(
-                            f"Operating system mismatch: User-Agent indicates {ua_os.capitalize()} "
+                            f"Operating system mismatch: User-Agent indicates {ua_os_display} "
                             f"but 'sec-ch-ua-platform' specifies {sec_ch_ua_platform}. "
                             "Anti-bot platforms immediately identify conflicting OS claims as automated spoofing."
                         ),
                         fix=(
                             f"Align 'sec-ch-ua-platform' with the OS in your User-Agent "
-                            f"(expected: \"{ua_os.capitalize() if ua_os != 'macos' else 'macOS'}\")."
+                            f"(expected: \"{ua_os_display}\")."
                         ),
                     )
 

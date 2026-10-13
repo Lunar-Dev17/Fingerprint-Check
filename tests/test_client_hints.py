@@ -76,16 +76,30 @@ def test_version_mismatch_fails():
 
 def test_platform_mismatch_fails():
     check = ClientHintsCheck()
+
+    # macOS in UA, but Windows in sec-ch-ua-platform
+    req_mac = build_fake_request(headers=[
+        ("user-agent", CHROME_MAC_UA),
+        ("sec-ch-ua", '"Chromium";v="124", "Google Chrome";v="124"'),
+        ("sec-ch-ua-platform", '"Windows"'),
+    ])
+    result_mac = check.run(req_mac)
+    assert result_mac.status == "fail"
+    assert "mismatch" in result_mac.explanation.lower()
+    assert "macOS" in result_mac.explanation
+    assert "Windows" in result_mac.explanation
+
     # Windows in UA, but macOS in sec-ch-ua-platform
-    req = build_fake_request(headers=[
+    req_win = build_fake_request(headers=[
         ("user-agent", CHROME_WIN_UA),
         ("sec-ch-ua", '"Chromium";v="124", "Google Chrome";v="124"'),
         ("sec-ch-ua-platform", '"macOS"'),
     ])
-    result = check.run(req)
-    assert result.status == "fail"
-    assert "mismatch" in result.explanation.lower()
-    assert "Windows" in result.explanation
+    result_win = check.run(req_win)
+    assert result_win.status == "fail"
+    assert "mismatch" in result_win.explanation.lower()
+    assert "Windows" in result_win.explanation
+    assert "macOS" in result_win.explanation
 
 
 def test_mobile_mismatch_warns():
